@@ -28,6 +28,8 @@
 
 @interface REComposeViewController ()
 
+@property (nonatomic, strong) UIImageView *bottomImageView;
+
 @end
 
 @implementation REComposeViewController
@@ -52,6 +54,9 @@
 {
     [super viewDidLoad];
     
+    _bottomImageView = [[UIImageView alloc] initWithFrame:self.view.bounds];
+    _bottomImageView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+    
     _backgroundView = [[REComposeBackgroundView alloc] initWithFrame:self.view.bounds];
     _backgroundView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     _backgroundView.centerOffset = CGSizeMake(0, - self.view.frame.size.height / 2);
@@ -71,6 +76,7 @@
     _sheetView.clipsToBounds = YES;
     _sheetView.delegate = self;
     
+    [self.view addSubview:_bottomImageView];
     [self.view addSubview:_backgroundView];
     [_containerView addSubview:_backView];
     [self.view addSubview:_containerView];
@@ -106,6 +112,18 @@
                      animations:^{
         _backgroundView.alpha = 1;
     } completion:nil];
+}
+
+- (void)viewDidAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
+    
+    UIGraphicsBeginImageContextWithOptions(self.view.bounds.size, YES, [[UIScreen mainScreen] scale]);
+    [self.presentingViewController.view.layer renderInContext:UIGraphicsGetCurrentContext()];
+    UIImage *presentingViewControllerSnapshotImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    
+    [self.bottomImageView setImage:presentingViewControllerSnapshotImage];
 }
 
 - (void)layoutWithOrientation:(UIInterfaceOrientation)interfaceOrientation width:(NSInteger)width height:(NSInteger)height
