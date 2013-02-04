@@ -186,16 +186,9 @@
 
 - (IBAction)accountButtonTouched
 {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
-
-    SEL tweetTextViewAccountButtonWasTouched = sel_registerName("tweetTextViewAccountButtonWasTouched:");
-
-    if ([self.delegate respondsToSelector:tweetTextViewAccountButtonWasTouched]) {
-        [self.delegate performSelector:tweetTextViewAccountButtonWasTouched withObject:self];
+    if ([self.delegate respondsToSelector:@selector(textViewAccountButtonWasTouched:)]) {
+        [self.delegate textViewAccountButtonWasTouched:self];
     }
-#pragma clang diagnostic pop
-
 }
 
 

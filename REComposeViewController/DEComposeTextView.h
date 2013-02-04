@@ -17,18 +17,19 @@
 //
 #import <UIKit/UIKit.h>
 
-@protocol DEComposeTextViewDelegate;
+@class DEComposeTextView;
+
+@protocol DEComposeTextViewDelegate <UITextViewDelegate>
+
+@optional
+- (void)textViewAccountButtonWasTouched:(DEComposeTextView *)textView;
+
+@end
 
 @interface DEComposeTextView : UITextView
 
 @property (nonatomic, copy) NSString *accountName;
 @property (nonatomic, readonly) CGRect fromButtonFrame;  // So the popover can be displayed from this rect.
-
-@end
-
-
-@protocol DEComposeTextViewDelegate <NSObject>
-
-- (void)textViewAccountButtonWasTouched:(DEComposeTextView *)textView;
+@property(nonatomic, assign) id<DEComposeTextViewDelegate> delegate;
 
 @end
