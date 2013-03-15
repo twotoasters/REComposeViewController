@@ -10,8 +10,6 @@ Replicates functionality of SLComposeViewController introduced in iOS 6.0. You c
 * iOS 5.0 or higher
 * ARC
 
-If you are not using ARC in your project, add `-fobjc-arc` as a compiler flag for all the files in this project.
-
 ## Demo
 
 Build and run the `REComposeViewControllerExample` project in Xcode to see `REComposeViewController` in action.
@@ -34,7 +32,7 @@ Edit your Podfile and add REComposeViewController:
 ``` bash
 $ edit Podfile
 platform :ios, '5.0'
-pod 'REComposeViewController', '~> 1.1'
+pod 'REComposeViewController', '~> 1.1.1'
 ```
 
 Install into your Xcode project:
@@ -122,12 +120,13 @@ Roman Efimov
 
 - https://github.com/romaonthego
 - https://twitter.com/romaonthego
+- romefimov@gmail.com
 
 ## License
 
 REComposeViewController is available under the MIT license.
 
-Copyright © 2012 Roman Efimov.
+Copyright © 2013 Roman Efimov.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
