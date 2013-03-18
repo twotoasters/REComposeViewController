@@ -142,7 +142,7 @@
         CGRect frame = _containerView.frame;
         
         if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
-            offset *= 2;
+            offset += 128.0f;
         }
         
         NSInteger verticalOffset = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? 316 : 216;
