@@ -37,20 +37,20 @@
         center.x += self.centerOffset.width;
         center.y += self.centerOffset.height;
     }
-    
+
     CGContextRef currentContext = UIGraphicsGetCurrentContext();
-    
+
     size_t num_locations = 2;
     CGFloat locations[2] = { 0.0, 1.0 };
     CGFloat components[8] = { 0.0, 0.0, 0.0, 0.7,   // Start color
         0.0, 0.0, 0.0, 0.85 }; // End color
-    
+
     CGColorSpaceRef rgbColorspace = CGColorSpaceCreateDeviceRGB();
     CGGradientRef gradient = CGGradientCreateWithColorComponents(rgbColorspace, components, locations, num_locations);
     CGGradientDrawingOptions options = kCGGradientDrawsBeforeStartLocation | kCGGradientDrawsAfterEndLocation;
     CGFloat endRadius = [UIApplication sharedApplication].keyWindow.bounds.size.height / 2;
     CGContextDrawRadialGradient(currentContext, gradient, center, 20.0f, center, endRadius, options);
-    
+
     CGGradientRelease(gradient);
     CGColorSpaceRelease(rgbColorspace);
 }

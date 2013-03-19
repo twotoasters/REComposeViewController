@@ -6,13 +6,13 @@
 //
 //  Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 //  Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
-//  Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer 
-//  in the documentation and/or other materials provided with the distribution. Neither the name of the Double Encore Inc. nor the names of its 
+//  Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer
+//  in the documentation and/or other materials provided with the distribution. Neither the name of the Double Encore Inc. nor the names of its
 //  contributors may be used to endorse or promote products derived from this software without specific prior written permission.
-//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, 
-//  THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS 
-//  BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE 
-//  GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT 
+//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+//  THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS
+//  BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+//  GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 //  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
@@ -55,7 +55,7 @@
     if (self) {
         [self textViewInit];
     }
-    
+
     return self;
 }
 
@@ -66,13 +66,13 @@
     if (self) {
         [self textViewInit];
     }
-    
+
     return self;
 }
 
 
 - (void)textViewInit
-{   
+{
     self.clipsToBounds = NO;
 
     _ruledView = [[DEComposeRuledView alloc] initWithFrame:[self ruledViewFrame]];
@@ -88,24 +88,24 @@
 - (void)layoutSubviews
 {
     [super layoutSubviews];
-    
+
     if ([self.accountName length] > 0) {
         CGRect frame = self.fromButton.frame;
         frame.origin = CGPointMake(12.0f, -21.0f);
         self.fromButton.frame = frame;
-        
+
         frame = self.accountButton.frame;
         frame.origin.x = CGRectGetMaxX(self.fromButton.frame) + 3.0f;
         frame.origin.y = self.fromButton.frame.origin.y;
         self.accountButton.frame = frame;
-        
+
         frame = self.accountLine.frame;
         frame.origin = CGPointMake(0.0f, CGRectGetMaxY(self.fromButton.frame) + 2.0f);
         self.accountLine.frame = frame;
-        
+
         self.contentInset = UIEdgeInsetsMake(25.0f, 0.0f, 0.0f, 0.0f);
     }
-    
+
     self.ruledView.frame = [self ruledViewFrame];
 }
 
@@ -131,7 +131,7 @@
     CGFloat extraForBounce = 200.0f;  // Extra added to top and bottom so it's visible when the user drags past the bounds.
     CGFloat width = 1024.0f;  // Needs to be at least as wide as we might make the Tweet sheet.
     CGFloat textAlignmentOffset = -2.0f;  // To center the text between the lines. May want to find a way to determine this procedurally eventually.
-    
+
     CGRect frame;
     if ([self.accountName length] > 0) {
         frame = CGRectMake(0.0f, 30.0f, width, self.contentSize.height + extraForBounce);
@@ -139,7 +139,7 @@
     else {
         frame = CGRectMake(0.0f, -extraForBounce + textAlignmentOffset, width, self.contentSize.height + (2 * extraForBounce));
     }
-    
+
     return frame;
 }
 
@@ -164,7 +164,7 @@
             [self.accountButton setTitleColor:[UIColor lightTextColor] forState:UIControlStateHighlighted];
             self.accountButton.titleLabel.font = [UIFont systemFontOfSize:17.0f];
             [self addSubview:self.accountButton];
-            
+
             self.accountLine = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"DEFacebookCardAccountLine"]];
             [self addSubview:self.accountLine];
         }
@@ -172,7 +172,7 @@
         [self.accountButton sizeToFit];
         [self setNeedsLayout];
     }
-    
+
     else {
         [self.fromButton removeFromSuperview];
         self.fromButton = nil;

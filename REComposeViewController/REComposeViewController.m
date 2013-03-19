@@ -68,7 +68,7 @@
     _backgroundView.centerOffset = CGSizeMake(0, - self.view.frame.size.height / 2);
     _backgroundView.alpha = 0;
     [self.view addSubview:_backgroundView];
-    
+
     _containerView = [[UIView alloc] initWithFrame:CGRectMake(0, self.view.frame.size.height, self.view.frame.size.width, 202)];
     _containerView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     _backView = [[UIView alloc] initWithFrame:CGRectMake(4, 0, self.currentWidth - 8, 202)];
@@ -78,24 +78,24 @@
     _backView.layer.shadowOffset = CGSizeMake(3, 5);
     _backView.layer.shouldRasterize = YES;
     _backView.layer.rasterizationScale = [UIScreen mainScreen].scale;
-    
+
     _sheetView.frame = _backView.bounds;
     _sheetView.layer.cornerRadius = _cornerRadius;
     _sheetView.clipsToBounds = YES;
     _sheetView.delegate = self;
-    
+
     [_containerView addSubview:_backView];
     [self.view addSubview:_containerView];
     [_backView addSubview:_sheetView];
-    
+
     _paperclipView = [[UIImageView alloc] initWithFrame:CGRectMake(self.view.frame.size.width - 77, 60, 79, 34)];
     _paperclipView.image = [UIImage imageNamed:@"REComposeViewController.bundle/PaperClip"];
     [_containerView addSubview:_paperclipView];
     [_paperclipView setHidden:YES];
-    
+
     if (!_attachmentImage)
         _attachmentImage = [UIImage imageNamed:@"REComposeViewController.bundle/URLAttachment"];
-    
+
     _sheetView.attachmentImageView.image = _attachmentImage;
 }
 
@@ -103,19 +103,19 @@
 {
     [super didMoveToParentViewController:parent];
     __typeof(&*self) __weak weakSelf = self;
-    
+
     [UIView animateWithDuration:0.4 animations:^{
         [weakSelf.sheetView.textView becomeFirstResponder];
         [weakSelf layoutWithOrientation:weakSelf.interfaceOrientation width:weakSelf.view.frame.size.width height:weakSelf.view.frame.size.height];
     }];
-    
+
     [UIView animateWithDuration:0.3
                           delay:0
                         options:UIViewAnimationOptionCurveEaseInOut
                      animations:^{
         weakSelf.backgroundView.alpha = 1;
     } completion:nil];
-    
+
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(viewOrientationDidChanged:) name:UIDeviceOrientationDidChangeNotification object:nil];
 
 }
@@ -139,22 +139,22 @@
     NSInteger offset = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? 60 : 4;
     if (UIInterfaceOrientationIsLandscape(interfaceOrientation)) {
         CGRect frame = _containerView.frame;
-        
+
         if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
             offset += 128.0f;
         }
-        
+
         NSInteger verticalOffset = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? 316 : 216;
-        
+
         NSInteger containerHeight = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? _containerView.frame.size.height : _containerView.frame.size.height;
         frame.origin.y = (height - verticalOffset - containerHeight) / 2;
         if (frame.origin.y < 20) frame.origin.y = 20;
         _containerView.frame = frame;
-        
+
         _containerView.clipsToBounds = YES;
         _backView.frame = CGRectMake(offset, 0, width - offset*2, UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? 202 : 140);
         _sheetView.frame = _backView.bounds;
-        
+
         CGRect paperclipFrame = _paperclipView.frame;
         paperclipFrame.origin.x = width - 73 - offset;
         _paperclipView.frame = paperclipFrame;
@@ -165,29 +165,29 @@
         _containerView.frame = frame;
         _backView.frame = CGRectMake(offset, 0, width - offset*2, 202);
         _sheetView.frame = _backView.bounds;
-        
-        
+
+
         CGRect paperclipFrame = _paperclipView.frame;
         paperclipFrame.origin.x = width - 73 - offset;
         _paperclipView.frame = paperclipFrame;
     }
-    
+
     _paperclipView.hidden = !_hasAttachment;
     _sheetView.attachmentView.hidden = !_hasAttachment;
-    
+
     [_sheetView.navigationBar sizeToFit];
-    
+
     CGRect attachmentViewFrame = _sheetView.attachmentView.frame;
     attachmentViewFrame.origin.x = _sheetView.frame.size.width - 84;
     attachmentViewFrame.origin.y = _sheetView.navigationBar.frame.size.height + 10;
     _sheetView.attachmentView.frame = attachmentViewFrame;
-    
+
     CGRect textViewFrame = _sheetView.textView.frame;
     textViewFrame.size.width = !_hasAttachment ? _sheetView.frame.size.width : _sheetView.frame.size.width - 84;
     _sheetView.textView.scrollIndicatorInsets = UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, _hasAttachment ? -85 : 0);
     textViewFrame.size.height = _sheetView.frame.size.height - _sheetView.navigationBar.frame.size.height - 3;
     _sheetView.textView.frame = textViewFrame;
-    
+
     CGRect textViewContainerFrame = _sheetView.textViewContainer.frame;
     textViewContainerFrame.origin.y = _sheetView.navigationBar.frame.size.height;
     textViewContainerFrame.size.height = _sheetView.frame.size.height - _sheetView.navigationBar.frame.size.height;
@@ -198,13 +198,13 @@
 {
     [_sheetView.textView resignFirstResponder];
     __typeof(&*self) __weak weakSelf = self;
-    
+
     [UIView animateWithDuration:0.4 animations:^{
         CGRect frame = _containerView.frame;
         frame.origin.y = self.view.frame.size.height;
         weakSelf.containerView.frame = frame;
     }];
-    
+
     [UIView animateWithDuration:0.4
                           delay:0.1
                         options:UIViewAnimationOptionCurveEaseInOut

@@ -28,14 +28,14 @@
     [socialExampleButton addTarget:self action:@selector(socialExampleButtonPressed) forControlEvents:UIControlEventTouchUpInside];
     [socialExampleButton setTitle:@"Some social network" forState:UIControlStateNormal];
     [self.view addSubview:socialExampleButton];
-    
+
     UIButton *tumblrExampleButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
     tumblrExampleButton.frame = CGRectMake((self.view.frame.size.width - 200) / 2.0f, 70, 200, 40);
     tumblrExampleButton.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     [tumblrExampleButton addTarget:self action:@selector(tumblrExampleButtonPressed) forControlEvents:UIControlEventTouchUpInside];
     [tumblrExampleButton setTitle:@"Tumblr" forState:UIControlStateNormal];
     [self.view addSubview:tumblrExampleButton];
-    
+
     UIButton *foursquareExampleButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
     foursquareExampleButton.frame = CGRectMake((self.view.frame.size.width - 200) / 2.0f, 120, 200, 40);
     foursquareExampleButton.autoresizingMask = UIViewAutoresizingFlexibleWidth;
@@ -74,27 +74,27 @@
     UIImageView *titleImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"foursquare-logo"]];
     titleImageView.frame = CGRectMake(0, 0, 110, 30);
     composeViewController.navigationItem.titleView = titleImageView;
-    
+
     // UIApperance setup
     //
     [composeViewController.navigationBar setBackgroundImage:[UIImage imageNamed:@"bg"] forBarMetrics:UIBarMetricsDefault];
     composeViewController.navigationItem.leftBarButtonItem.tintColor = [UIColor colorWithRed:60/255.0 green:165/255.0 blue:194/255.0 alpha:1];
     composeViewController.navigationItem.rightBarButtonItem.tintColor = [UIColor colorWithRed:29/255.0 green:118/255.0 blue:143/255.0 alpha:1];
-    
+
     // Alternative use with REComposeViewControllerCompletionHandler
     //
     composeViewController.completionHandler = ^(REComposeViewController *composeViewController, REComposeResult result) {
         [composeViewController dismissViewControllerAnimated:YES completion:nil];
-        
+
         if (result == REComposeResultCancelled) {
             NSLog(@"Cancelled");
         }
-        
+
         if (result == REComposeResultPosted) {
             NSLog(@"Text: %@", composeViewController.text);
         }
     };
-    
+
     [composeViewController presentFromRootViewController];
 }
 
@@ -122,11 +122,11 @@
 - (void)composeViewController:(REComposeViewController *)composeViewController didFinishWithResult:(REComposeResult)result
 {
     [composeViewController dismissViewControllerAnimated:YES completion:nil];
-    
+
     if (result == REComposeResultCancelled) {
         NSLog(@"Cancelled");
     }
-    
+
     if (result == REComposeResultPosted) {
         NSLog(@"Text: %@", composeViewController.text);
     }
