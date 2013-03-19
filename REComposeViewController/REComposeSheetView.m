@@ -26,6 +26,18 @@
 #import "REComposeSheetView.h"
 #import <QuartzCore/QuartzCore.h>
 
+static const CGFloat kNavigationBarHeight = 44.0f;
+static const CGSize kAttachmentViewSize = { 84.0f, 79.0f };
+static const CGFloat kAttachmentViewOriginY = 54.0f;
+static const CGRect kAttachmentImageViewFrame = { 6.0f, 2.0f, 72.0f, 72.0f };
+static const CGFloat kAttachmentImageViewCornerRadius = 3.0f;
+
+static const CGFloat kLineWidth = 1.0f;
+static const CGFloat kDefaultLineYOffset = -5.0f;
+
+@interface REComposeSheetView () <UITextViewDelegate>
+@end
+
 @implementation REComposeSheetView
 
 - (id)initWithFrame:(CGRect)frame
@@ -34,72 +46,85 @@
     if (self) {
         self.backgroundColor = [UIColor whiteColor];
 
-        _navigationBar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, 44)];
-        _navigationBar.autoresizingMask = UIViewAutoresizingFlexibleWidth
-        | UIViewAutoresizingFlexibleBottomMargin
-        | UIViewAutoresizingFlexibleRightMargin;
+        frame = self.bounds;
+        frame.size.height = kNavigationBarHeight;
+        _navigationBar = [[UINavigationBar alloc] initWithFrame:frame];
+        _navigationBar.autoresizingMask = (  UIViewAutoresizingFlexibleBottomMargin
+                                           | UIViewAutoresizingFlexibleWidth);
+        [self addSubview:_navigationBar];
 
-        _navigationItem = [[UINavigationItem alloc] initWithTitle:@""];
-        _navigationBar.items = @[_navigationItem];
+        frame = UIEdgeInsetsInsetRect(self.bounds, UIEdgeInsetsMake(CGRectGetHeight(_navigationBar.frame), 0.0f, 0.0f, 0.0f));
+        _textView = [[UITextView alloc] initWithFrame:frame];
+        _textView.backgroundColor = [UIColor clearColor];
+        _textView.opaque = NO;
+        _textView.font = [UIFont systemFontOfSize:21.0f];
+        _textView.alwaysBounceVertical = YES;
+        _textView.autoresizingMask = (  UIViewAutoresizingFlexibleWidth
+                                      | UIViewAutoresizingFlexibleHeight);
+        _textView.showsVerticalScrollIndicator = NO;
+        _textView.delegate = self;
+        [self insertSubview:_textView belowSubview:_navigationBar];
 
-        UIBarButtonItem *cancelButtonItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedStringWithDefaultValue(@"REComposeSheetView_Cancel", nil, [NSBundle mainBundle], @"Cancel", @"Cancel") style:UIBarButtonItemStyleBordered target:self action:@selector(cancelButtonPressed)];
-        _navigationItem.leftBarButtonItem = cancelButtonItem;
-
-        UIBarButtonItem *postButtonItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedStringWithDefaultValue(@"REComposeSheetView_Post", nil, [NSBundle mainBundle], @"Post", @"Post") style:UIBarButtonItemStyleBordered target:self action:@selector(postButtonPressed)];
-        _navigationItem.rightBarButtonItem = postButtonItem;
-
-
-        _textViewContainer = [[UIView alloc] initWithFrame:CGRectMake(0, 44, frame.size.width, frame.size.height - 44)];
-        _textViewContainer.clipsToBounds = YES;
-        _textViewContainer.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-        _textView = [[DEComposeTextView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, frame.size.height - 47)];
-        _textView.backgroundColor = [UIColor whiteColor];
-        _textView.font = [UIFont systemFontOfSize:21];
-        _textView.contentInset = UIEdgeInsetsMake(0, 0, 20, 0);
-        _textView.bounces = YES;
-
-        [_textViewContainer addSubview:_textView];
-        [self addSubview:_textViewContainer];
-
-        _attachmentView = [[UIView alloc] initWithFrame:CGRectMake(frame.size.width - 84, 54, 84, 79)];
+        frame = (CGRect){ (CGPoint){ CGRectGetMaxX(self.bounds) - kAttachmentViewSize.width, kAttachmentViewOriginY }, kAttachmentViewSize };
+        _attachmentView = [[UIView alloc] initWithFrame:frame];
+        _attachmentView.hidden = YES;
+        _attachmentView.autoresizingMask = (  UIViewAutoresizingFlexibleLeftMargin
+                                            | UIViewAutoresizingFlexibleBottomMargin);
         [self addSubview:_attachmentView];
 
-        _attachmentImageView = [[UIImageView alloc] initWithFrame:CGRectMake(6, 2, 72, 72)];
-        _attachmentImageView.layer.cornerRadius = 3.0f;
+        _attachmentImageView = [[UIImageView alloc] initWithFrame:kAttachmentImageViewFrame];
+        _attachmentImageView.layer.cornerRadius = kAttachmentImageViewCornerRadius;
         _attachmentImageView.layer.masksToBounds = YES;
         [_attachmentView addSubview:_attachmentImageView];
 
-        _attachmentContainerView = [[UIImageView alloc] initWithFrame:_attachmentView.bounds];
-        _attachmentContainerView.image = [UIImage imageNamed:@"REComposeViewController.bundle/AttachmentFrame"];
-        [_attachmentView addSubview:_attachmentContainerView];
-        _attachmentView.hidden = YES;
+        UIImage *attachmentFrameImage = [UIImage imageNamed:@"REComposeViewController.bundle/AttachmentFrame"];
+        UIImageView *attachmentFrameImageView = [[UIImageView alloc] initWithImage:attachmentFrameImage];
+        [_attachmentView addSubview:attachmentFrameImageView];
 
-        [self addSubview:_navigationBar];
+        _lineYOffset = kDefaultLineYOffset;
     }
     return self;
+}
+
+- (void)drawRect:(CGRect)rect
+{
+    CGFloat lineHeight = self.textView.font.lineHeight;
+
+    if (lineHeight > 0.0f) {
+        [[UIColor colorWithWhite:0.925f alpha:1.0f] setFill];
+
+        CGRect lineRect = CGRectMake(CGRectGetMinX(self.bounds),
+                                     CGRectGetMinY(self.bounds) + self.lineYOffset + lineHeight - self.textView.contentOffset.y,
+                                     CGRectGetWidth(self.bounds),
+                                     kLineWidth);
+
+        while (CGRectGetMinY(lineRect) > CGRectGetMinY(self.bounds)) {
+            lineRect.origin.y -= lineHeight;
+        }
+
+        while (CGRectGetMinY(lineRect) < CGRectGetMaxY(self.bounds)) {
+            UIRectFill(lineRect);
+            lineRect.origin.y += lineHeight;
+        }
+    }
 }
 
 - (void)layoutSubviews
 {
     [super layoutSubviews];
-    if (_delegate) {
-        UIViewController *delegate = _delegate;
-        _navigationItem.title = delegate.title;
-    }
+
+    UIEdgeInsets insets = UIEdgeInsetsMake(CGRectGetHeight(self.navigationBar.frame),
+                                           0.0f,
+                                           0.0f,
+                                           self.attachmentView.hidden ? 0.0f : CGRectGetMaxX(self.bounds) - CGRectGetMinX(self.attachmentView.frame));
+    self.textView.frame = UIEdgeInsetsInsetRect(self.bounds, insets);
 }
 
-- (void)cancelButtonPressed
-{
-    id<REComposeSheetViewDelegate> localDelegate = _delegate;
-    if ([localDelegate respondsToSelector:@selector(cancelButtonPressed)])
-        [localDelegate cancelButtonPressed];
-}
+#pragma mark - UITextViewDelegate
 
-- (void)postButtonPressed
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
-    id<REComposeSheetViewDelegate> localDelegate = _delegate;
-    if ([localDelegate respondsToSelector:@selector(postButtonPressed)])
-        [localDelegate postButtonPressed];
+    [self setNeedsDisplay];
 }
 
 @end

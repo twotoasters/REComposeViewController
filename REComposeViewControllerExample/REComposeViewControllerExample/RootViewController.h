@@ -7,8 +7,6 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "REComposeViewController.h"
 
-@interface RootViewController : UIViewController <REComposeViewControllerDelegate>
-
+@interface RootViewController : UIViewController
 @end

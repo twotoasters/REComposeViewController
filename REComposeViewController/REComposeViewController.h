@@ -24,43 +24,20 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "REComposeSheetView.h"
-#import "REComposeBackgroundView.h"
 
-@class REComposeViewController;
+@interface REComposeViewController : UIViewController
 
-typedef enum _REComposeResult {
-    REComposeResultCancelled,
-    REComposeResultPosted
-} REComposeResult;
-
-typedef void (^REComposeViewControllerCompletionHandler)(REComposeViewController *composeViewController, REComposeResult result);
-
-@protocol REComposeViewControllerDelegate;
-
-@interface REComposeViewController : UIViewController <REComposeSheetViewDelegate> {
-    REComposeSheetView *_sheetView;
-    REComposeBackgroundView *_backgroundView;
-    UIView *_backView;
-    UIView *_containerView;
-    UIImageView *_paperclipView;
-}
-
-@property (copy, readwrite, nonatomic) REComposeViewControllerCompletionHandler completionHandler;
-@property (weak, readwrite, nonatomic) id<REComposeViewControllerDelegate> delegate;
-@property (assign, readwrite, nonatomic) NSInteger cornerRadius;
-@property (assign, readwrite, nonatomic) BOOL hasAttachment;
-@property (strong, readwrite, nonatomic) NSString *text;
-@property (strong, readonly, nonatomic) UINavigationBar *navigationBar;
-@property (strong, readonly, nonatomic) UINavigationItem *navigationItem;
-@property (strong, readwrite, nonatomic) UIImage *attachmentImage;
-
-- (void)presentFromRootViewController;
+@property (nonatomic, copy) NSString *text;
+@property (nonatomic, getter=hasAttachment) BOOL attachment;
+@property (nonatomic, strong) UIImage *attachmentImage;
+@property (nonatomic) NSInteger cornerRadius;
 
 @end
 
-@protocol REComposeViewControllerDelegate <NSObject>
+@interface UIViewController (REComposeViewControllerPresentation)
 
-- (void)composeViewController:(REComposeViewController *)composeViewController didFinishWithResult:(REComposeResult)result;
+@property (nonatomic, strong) REComposeViewController *presentedComposeViewController;
+- (void)presentComposeViewController:(REComposeViewController *)viewController animated:(BOOL)animated;
+- (void)dismissComposeViewControllerAnimated:(BOOL)animated completion:(void (^)(void))completion;
 
 @end

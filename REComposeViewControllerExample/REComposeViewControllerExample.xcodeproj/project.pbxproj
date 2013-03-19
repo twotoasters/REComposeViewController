@@ -20,9 +20,7 @@
 		30118CEE1631D1D200B82F14 /* RootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 30118CED1631D1D200B82F14 /* RootViewController.m */; };
 		30118D041631D92800B82F14 /* REComposeSheetView.m in Sources */ = {isa = PBXBuildFile; fileRef = 30118D031631D92800B82F14 /* REComposeSheetView.m */; };
 		30118D061631DA4F00B82F14 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 30118D051631DA4F00B82F14 /* QuartzCore.framework */; };
-		30118D091631DBB500B82F14 /* REComposeBackgroundView.m in Sources */ = {isa = PBXBuildFile; fileRef = 30118D081631DBB500B82F14 /* REComposeBackgroundView.m */; };
-		30118D281631F31600B82F14 /* DEComposeRuledView.m in Sources */ = {isa = PBXBuildFile; fileRef = 30118D251631F29900B82F14 /* DEComposeRuledView.m */; };
-		30118D291631F31800B82F14 /* DEComposeTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 30118D271631F29900B82F14 /* DEComposeTextView.m */; };
+		30118D091631DBB500B82F14 /* REComposeView.m in Sources */ = {isa = PBXBuildFile; fileRef = 30118D081631DBB500B82F14 /* REComposeView.m */; };
 		30554D21163231F00069220E /* Flower.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 30554D20163231F00069220E /* Flower.jpg */; };
 		30554D24163253950069220E /* bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 30554D23163253950069220E /* bg@2x.png */; };
 		30554D26163255070069220E /* foursquare-logo@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 30554D25163255070069220E /* foursquare-logo@2x.png */; };
@@ -50,12 +48,8 @@
 		30118D021631D92800B82F14 /* REComposeSheetView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = REComposeSheetView.h; sourceTree = "<group>"; };
 		30118D031631D92800B82F14 /* REComposeSheetView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = REComposeSheetView.m; sourceTree = "<group>"; };
 		30118D051631DA4F00B82F14 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
-		30118D071631DBB500B82F14 /* REComposeBackgroundView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = REComposeBackgroundView.h; sourceTree = "<group>"; };
-		30118D081631DBB500B82F14 /* REComposeBackgroundView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = REComposeBackgroundView.m; sourceTree = "<group>"; };
-		30118D241631F29900B82F14 /* DEComposeRuledView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DEComposeRuledView.h; sourceTree = "<group>"; };
-		30118D251631F29900B82F14 /* DEComposeRuledView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DEComposeRuledView.m; sourceTree = "<group>"; };
-		30118D261631F29900B82F14 /* DEComposeTextView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DEComposeTextView.h; sourceTree = "<group>"; };
-		30118D271631F29900B82F14 /* DEComposeTextView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DEComposeTextView.m; sourceTree = "<group>"; };
+		30118D071631DBB500B82F14 /* REComposeView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = REComposeView.h; sourceTree = "<group>"; };
+		30118D081631DBB500B82F14 /* REComposeView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = REComposeView.m; sourceTree = "<group>"; };
 		30554D20163231F00069220E /* Flower.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = Flower.jpg; sourceTree = "<group>"; };
 		30554D23163253950069220E /* bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "bg@2x.png"; sourceTree = "<group>"; };
 		30554D25163255070069220E /* foursquare-logo@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "foursquare-logo@2x.png"; sourceTree = "<group>"; };
@@ -139,16 +133,12 @@
 			isa = PBXGroup;
 			children = (
 				30FD6D631631F8550017516D /* REComposeViewController.bundle */,
-				30118D241631F29900B82F14 /* DEComposeRuledView.h */,
-				30118D251631F29900B82F14 /* DEComposeRuledView.m */,
-				30118D261631F29900B82F14 /* DEComposeTextView.h */,
-				30118D271631F29900B82F14 /* DEComposeTextView.m */,
-				30118CE91631D18A00B82F14 /* REComposeViewController.h */,
-				30118CEA1631D18A00B82F14 /* REComposeViewController.m */,
-				30118D071631DBB500B82F14 /* REComposeBackgroundView.h */,
-				30118D081631DBB500B82F14 /* REComposeBackgroundView.m */,
 				30118D021631D92800B82F14 /* REComposeSheetView.h */,
 				30118D031631D92800B82F14 /* REComposeSheetView.m */,
+				30118D071631DBB500B82F14 /* REComposeView.h */,
+				30118D081631DBB500B82F14 /* REComposeView.m */,
+				30118CE91631D18A00B82F14 /* REComposeViewController.h */,
+				30118CEA1631D18A00B82F14 /* REComposeViewController.m */,
 			);
 			name = REComposeViewController;
 			path = ../REComposeViewController;
@@ -228,9 +218,7 @@
 				30118CEB1631D18A00B82F14 /* REComposeViewController.m in Sources */,
 				30118CEE1631D1D200B82F14 /* RootViewController.m in Sources */,
 				30118D041631D92800B82F14 /* REComposeSheetView.m in Sources */,
-				30118D281631F31600B82F14 /* DEComposeRuledView.m in Sources */,
-				30118D291631F31800B82F14 /* DEComposeTextView.m in Sources */,
-				30118D091631DBB500B82F14 /* REComposeBackgroundView.m in Sources */,
+				30118D091631DBB500B82F14 /* REComposeView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

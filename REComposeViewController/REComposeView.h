@@ -1,6 +1,6 @@
 //
-//  DEFacebookTextView.h
-//  DEFacebooker
+//  REComposeView.h
+//  REComposeViewController
 //
 //  Copyright (c) 2011 Double Encore, Inc. All rights reserved.
 //
@@ -15,21 +15,18 @@
 //  GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 //  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
+
 #import <UIKit/UIKit.h>
 
-@class DEComposeTextView;
+@class REComposeSheetView;
 
-@protocol DEComposeTextViewDelegate <UITextViewDelegate>
+@interface REComposeView : UIView
 
-@optional
-- (void)textViewAccountButtonWasTouched:(DEComposeTextView *)textView;
+@property (nonatomic, strong) REComposeSheetView *sheetView;
 
-@end
+@property (nonatomic, strong, readonly) UIView *shadowView;
+@property (nonatomic, strong, readonly) UIImageView *paperClipView;
 
-@interface DEComposeTextView : UITextView
-
-@property (nonatomic, copy) NSString *accountName;
-@property (nonatomic, readonly) CGRect fromButtonFrame;  // So the popover can be displayed from this rect.
-@property(nonatomic, assign) id<DEComposeTextViewDelegate> delegate;
+@property (nonatomic) CGFloat cornerRadius;
 
 @end

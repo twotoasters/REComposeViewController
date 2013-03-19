@@ -9,12 +9,7 @@
 #import "RootViewController.h"
 #import "REComposeViewController.h"
 
-@interface RootViewController ()
-
-@end
-
 @implementation RootViewController
-
 
 - (void)viewDidLoad
 {
@@ -44,63 +39,6 @@
     [self.view addSubview:foursquareExampleButton];
 }
 
-#pragma mark -
-#pragma mark Button actions
-
-- (void)socialExampleButtonPressed
-{
-    REComposeViewController *composeViewController = [[REComposeViewController alloc] init];
-    composeViewController.title = @"Social Network";
-    composeViewController.hasAttachment = YES;
-    composeViewController.delegate = self;
-    composeViewController.text = @"Test";
-    [composeViewController presentFromRootViewController];
-}
-
-- (void)tumblrExampleButtonPressed
-{
-    REComposeViewController *composeViewController = [[REComposeViewController alloc] init];
-    composeViewController.title = @"Tumblr";
-    composeViewController.hasAttachment = YES;
-    composeViewController.attachmentImage = [UIImage imageNamed:@"Flower.jpg"];
-    composeViewController.delegate = self;
-    [composeViewController presentFromRootViewController];
-}
-
-- (void)foursquareExampleButtonPressed
-{
-    REComposeViewController *composeViewController = [[REComposeViewController alloc] init];
-    composeViewController.hasAttachment = YES;
-    UIImageView *titleImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"foursquare-logo"]];
-    titleImageView.frame = CGRectMake(0, 0, 110, 30);
-    composeViewController.navigationItem.titleView = titleImageView;
-
-    // UIApperance setup
-    //
-    [composeViewController.navigationBar setBackgroundImage:[UIImage imageNamed:@"bg"] forBarMetrics:UIBarMetricsDefault];
-    composeViewController.navigationItem.leftBarButtonItem.tintColor = [UIColor colorWithRed:60/255.0 green:165/255.0 blue:194/255.0 alpha:1];
-    composeViewController.navigationItem.rightBarButtonItem.tintColor = [UIColor colorWithRed:29/255.0 green:118/255.0 blue:143/255.0 alpha:1];
-
-    // Alternative use with REComposeViewControllerCompletionHandler
-    //
-    composeViewController.completionHandler = ^(REComposeViewController *composeViewController, REComposeResult result) {
-        [composeViewController dismissViewControllerAnimated:YES completion:nil];
-
-        if (result == REComposeResultCancelled) {
-            NSLog(@"Cancelled");
-        }
-
-        if (result == REComposeResultPosted) {
-            NSLog(@"Text: %@", composeViewController.text);
-        }
-    };
-
-    [composeViewController presentFromRootViewController];
-}
-
-#pragma mark -
-#pragma mark Orientation
-
 - (NSUInteger)supportedInterfaceOrientations
 {
     return UIInterfaceOrientationMaskAll;
@@ -116,20 +54,59 @@
     return YES;
 }
 
-#pragma mark -
-#pragma mark REComposeViewControllerDelegate
+#pragma mark - Button actions
 
-- (void)composeViewController:(REComposeViewController *)composeViewController didFinishWithResult:(REComposeResult)result
+- (void)socialExampleButtonPressed
 {
-    [composeViewController dismissViewControllerAnimated:YES completion:nil];
+    REComposeViewController *composeViewController = [REComposeViewController new];
+    composeViewController.title = @"Social Network";
+    composeViewController.attachment = NO;
+    composeViewController.text = @"Test";
+    composeViewController.cornerRadius = 2.0f;
+    composeViewController.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(cancelButtonTapped)];
+    composeViewController.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(doneButtonTapped)];
+    [self presentComposeViewController:composeViewController animated:YES];
+}
 
-    if (result == REComposeResultCancelled) {
-        NSLog(@"Cancelled");
-    }
+- (void)tumblrExampleButtonPressed
+{
+    REComposeViewController *composeViewController = [REComposeViewController new];
+    composeViewController.title = @"Tumblr";
+    composeViewController.attachment = YES;
+    composeViewController.attachmentImage = [UIImage imageNamed:@"Flower.jpg"];
+    composeViewController.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(cancelButtonTapped)];
+    composeViewController.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(doneButtonTapped)];
+    [self presentComposeViewController:composeViewController animated:NO];
+}
 
-    if (result == REComposeResultPosted) {
-        NSLog(@"Text: %@", composeViewController.text);
-    }
+- (void)foursquareExampleButtonPressed
+{
+    REComposeViewController *composeViewController = [REComposeViewController new];
+    composeViewController.attachment = YES;
+    composeViewController.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(cancelButtonTapped)];
+    composeViewController.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(doneButtonTapped)];
+    UIImageView *titleImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"foursquare-logo"]];
+    titleImageView.frame = CGRectMake(0, 0, 110, 30);
+    composeViewController.navigationItem.titleView = titleImageView;
+
+    // UIApperance setup
+    [[UINavigationBar appearance] setBackgroundImage:[UIImage imageNamed:@"bg"] forBarMetrics:UIBarMetricsDefault];
+    composeViewController.navigationItem.leftBarButtonItem.tintColor = [UIColor colorWithRed:60/255.0 green:165/255.0 blue:194/255.0 alpha:1];
+    composeViewController.navigationItem.rightBarButtonItem.tintColor = [UIColor colorWithRed:29/255.0 green:118/255.0 blue:143/255.0 alpha:1];
+
+    [self presentComposeViewController:composeViewController animated:YES];
+}
+
+- (void)cancelButtonTapped
+{
+    NSLog(@"%s", __PRETTY_FUNCTION__);
+    [self dismissComposeViewControllerAnimated:YES completion:nil];
+}
+
+- (void)doneButtonTapped
+{
+    NSLog(@"%s, text: %@", __PRETTY_FUNCTION__, self.presentedComposeViewController.text);
+    [self dismissComposeViewControllerAnimated:YES completion:^{ NSLog(@"done"); }];
 }
 
 @end

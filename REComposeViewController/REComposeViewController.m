@@ -24,14 +24,15 @@
 //
 
 #import "REComposeViewController.h"
+#import "REComposeView.h"
+#import "REComposeSheetView.h"
+#import <objc/runtime.h>
 #import <QuartzCore/QuartzCore.h>
 
+static const CGFloat kDefaultCornerRadius = 10.0f;
+
 @interface REComposeViewController ()
-
-@property (strong, readonly, nonatomic) REComposeBackgroundView *backgroundView;
-@property (strong, readonly, nonatomic) UIView *containerView;
-@property (strong, readonly, nonatomic) REComposeSheetView *sheetView;
-
+@property (nonatomic, strong, readonly) REComposeView *composeView;
 @end
 
 @implementation REComposeViewController
@@ -40,255 +41,231 @@
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
-        _cornerRadius = 10;
-        _sheetView = [[REComposeSheetView alloc] initWithFrame:CGRectMake(0, 0, self.currentWidth - 8, 202)];
+        _attachmentImage = [UIImage imageNamed:@"REComposeViewController.bundle/URLAttachment"];
+        _cornerRadius = kDefaultCornerRadius;
     }
     return self;
 }
 
-- (int)currentWidth
+- (void)dealloc
 {
-    UIScreen *screen = [UIScreen mainScreen];
-    return (!UIDeviceOrientationIsLandscape([[UIApplication sharedApplication] statusBarOrientation])) ? screen.bounds.size.width : screen.bounds.size.height;
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 - (void)loadView
 {
-    UIViewController *rootViewController = [UIApplication sharedApplication].delegate.window.rootViewController;
-    self.view = [[UIView alloc] initWithFrame:rootViewController.view.bounds];
-    self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    self.view = [[REComposeView alloc] initWithFrame:[UIScreen mainScreen].applicationFrame];
 }
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
 
-    _backgroundView = [[REComposeBackgroundView alloc] initWithFrame:self.view.bounds];
-    _backgroundView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    _backgroundView.centerOffset = CGSizeMake(0, - self.view.frame.size.height / 2);
-    _backgroundView.alpha = 0;
-    [self.view addSubview:_backgroundView];
-
-    _containerView = [[UIView alloc] initWithFrame:CGRectMake(0, self.view.frame.size.height, self.view.frame.size.width, 202)];
-    _containerView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-    _backView = [[UIView alloc] initWithFrame:CGRectMake(4, 0, self.currentWidth - 8, 202)];
-    _backView.layer.cornerRadius = _cornerRadius;
-    _backView.layer.shadowOpacity = 0.7;
-    _backView.layer.shadowColor = [UIColor blackColor].CGColor;
-    _backView.layer.shadowOffset = CGSizeMake(3, 5);
-    _backView.layer.shouldRasterize = YES;
-    _backView.layer.rasterizationScale = [UIScreen mainScreen].scale;
-
-    _sheetView.frame = _backView.bounds;
-    _sheetView.layer.cornerRadius = _cornerRadius;
-    _sheetView.clipsToBounds = YES;
-    _sheetView.delegate = self;
-
-    [_containerView addSubview:_backView];
-    [self.view addSubview:_containerView];
-    [_backView addSubview:_sheetView];
-
-    _paperclipView = [[UIImageView alloc] initWithFrame:CGRectMake(self.view.frame.size.width - 77, 60, 79, 34)];
-    _paperclipView.image = [UIImage imageNamed:@"REComposeViewController.bundle/PaperClip"];
-    [_containerView addSubview:_paperclipView];
-    [_paperclipView setHidden:YES];
-
-    if (!_attachmentImage)
-        _attachmentImage = [UIImage imageNamed:@"REComposeViewController.bundle/URLAttachment"];
-
-    _sheetView.attachmentImageView.image = _attachmentImage;
+    self.composeView.cornerRadius = self.cornerRadius;
 }
 
-- (void)didMoveToParentViewController:(UIViewController *)parent
+- (void)viewDidUnload
 {
-    [super didMoveToParentViewController:parent];
-    __typeof(&*self) __weak weakSelf = self;
+    [super viewDidUnload];
 
-    [UIView animateWithDuration:0.4 animations:^{
-        [weakSelf.sheetView.textView becomeFirstResponder];
-        [weakSelf layoutWithOrientation:weakSelf.interfaceOrientation width:weakSelf.view.frame.size.width height:weakSelf.view.frame.size.height];
-    }];
-
-    [UIView animateWithDuration:0.3
-                          delay:0
-                        options:UIViewAnimationOptionCurveEaseInOut
-                     animations:^{
-        weakSelf.backgroundView.alpha = 1;
-    } completion:nil];
-
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(viewOrientationDidChanged:) name:UIDeviceOrientationDidChangeNotification object:nil];
-
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
-- (void)presentFromRootViewController
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
 {
-    UIViewController *rootViewController = [UIApplication sharedApplication].delegate.window.rootViewController;
-    [rootViewController addChildViewController:self];
-    [rootViewController.view addSubview:self.view];
-    [self didMoveToParentViewController:rootViewController];
+    return YES;
 }
 
-- (void) viewWillDisappear:(BOOL)animated
+#pragma mark - Property setters
+
+- (void)setText:(NSString *)text
 {
-    [super viewWillDisappear: animated];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIDeviceOrientationDidChangeNotification object:nil];
-}
-
-- (void)layoutWithOrientation:(UIInterfaceOrientation)interfaceOrientation width:(NSInteger)width height:(NSInteger)height
-{
-    NSInteger offset = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? 60 : 4;
-    if (UIInterfaceOrientationIsLandscape(interfaceOrientation)) {
-        CGRect frame = _containerView.frame;
-
-        if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
-            offset += 128.0f;
-        }
-
-        NSInteger verticalOffset = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? 316 : 216;
-
-        NSInteger containerHeight = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? _containerView.frame.size.height : _containerView.frame.size.height;
-        frame.origin.y = (height - verticalOffset - containerHeight) / 2;
-        if (frame.origin.y < 20) frame.origin.y = 20;
-        _containerView.frame = frame;
-
-        _containerView.clipsToBounds = YES;
-        _backView.frame = CGRectMake(offset, 0, width - offset*2, UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? 202 : 140);
-        _sheetView.frame = _backView.bounds;
-
-        CGRect paperclipFrame = _paperclipView.frame;
-        paperclipFrame.origin.x = width - 73 - offset;
-        _paperclipView.frame = paperclipFrame;
-    } else {
-        CGRect frame = _containerView.frame;
-        frame.origin.y = (height - 216 - _containerView.frame.size.height) / 2;
-        if (frame.origin.y < 20) frame.origin.y = 20;
-        _containerView.frame = frame;
-        _backView.frame = CGRectMake(offset, 0, width - offset*2, 202);
-        _sheetView.frame = _backView.bounds;
-
-
-        CGRect paperclipFrame = _paperclipView.frame;
-        paperclipFrame.origin.x = width - 73 - offset;
-        _paperclipView.frame = paperclipFrame;
+    _text = [text copy];
+    if (self.isViewLoaded) {
+        self.composeView.sheetView.textView.text = _text;
     }
-
-    _paperclipView.hidden = !_hasAttachment;
-    _sheetView.attachmentView.hidden = !_hasAttachment;
-
-    [_sheetView.navigationBar sizeToFit];
-
-    CGRect attachmentViewFrame = _sheetView.attachmentView.frame;
-    attachmentViewFrame.origin.x = _sheetView.frame.size.width - 84;
-    attachmentViewFrame.origin.y = _sheetView.navigationBar.frame.size.height + 10;
-    _sheetView.attachmentView.frame = attachmentViewFrame;
-
-    CGRect textViewFrame = _sheetView.textView.frame;
-    textViewFrame.size.width = !_hasAttachment ? _sheetView.frame.size.width : _sheetView.frame.size.width - 84;
-    _sheetView.textView.scrollIndicatorInsets = UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, _hasAttachment ? -85 : 0);
-    textViewFrame.size.height = _sheetView.frame.size.height - _sheetView.navigationBar.frame.size.height - 3;
-    _sheetView.textView.frame = textViewFrame;
-
-    CGRect textViewContainerFrame = _sheetView.textViewContainer.frame;
-    textViewContainerFrame.origin.y = _sheetView.navigationBar.frame.size.height;
-    textViewContainerFrame.size.height = _sheetView.frame.size.height - _sheetView.navigationBar.frame.size.height;
-    _sheetView.textViewContainer.frame = textViewContainerFrame;
 }
 
-- (void)dismissViewControllerAnimated:(BOOL)flag completion:(void (^)(void))completion
+- (void)setAttachment:(BOOL)attachment
 {
-    [_sheetView.textView resignFirstResponder];
-    __typeof(&*self) __weak weakSelf = self;
-
-    [UIView animateWithDuration:0.4 animations:^{
-        CGRect frame = _containerView.frame;
-        frame.origin.y = self.view.frame.size.height;
-        weakSelf.containerView.frame = frame;
-    }];
-
-    [UIView animateWithDuration:0.4
-                          delay:0.1
-                        options:UIViewAnimationOptionCurveEaseInOut
-                     animations:^{
-                         weakSelf.backgroundView.alpha = 0;
-                     } completion:^(BOOL finished) {
-                         [weakSelf.view removeFromSuperview];
-                         [weakSelf removeFromParentViewController];
-                     }];
-}
-
-#pragma mark -
-#pragma mark Accessors
-
-- (UINavigationItem *)navigationItem
-{
-    return _sheetView.navigationItem;
-}
-
-- (UINavigationBar *)navigationBar
-{
-    return _sheetView.navigationBar;
+    _attachment = attachment;
+    if (self.isViewLoaded) {
+        self.composeView.sheetView.attachmentView.hidden = !_attachment;
+        [self.composeView setNeedsLayout];
+    }
 }
 
 - (void)setAttachmentImage:(UIImage *)attachmentImage
 {
     _attachmentImage = attachmentImage;
-    _sheetView.attachmentImageView.image = _attachmentImage;
-}
-
-- (NSString *)text
-{
-    return _sheetView.textView.text;
-}
-
-- (void)setText:(NSString *)text
-{
-    _sheetView.textView.text = text;
-}
-
-#pragma mark -
-#pragma mark REComposeSheetViewDelegate
-
-- (void)cancelButtonPressed
-{
-    id<REComposeViewControllerDelegate> localDelegate = _delegate;
-    if (localDelegate && [localDelegate respondsToSelector:@selector(composeViewController:didFinishWithResult:)]) {
-        [localDelegate composeViewController:self didFinishWithResult:REComposeResultCancelled];
+    if (self.isViewLoaded) {
+        self.composeView.sheetView.attachmentImageView.image = _attachmentImage;
     }
-    if (_completionHandler)
-        _completionHandler(self, REComposeResultCancelled);
 }
 
-- (void)postButtonPressed
+- (void)setCornerRadius:(NSInteger)cornerRadius
 {
-    id<REComposeViewControllerDelegate> localDelegate = _delegate;
-    if (localDelegate && [localDelegate respondsToSelector:@selector(composeViewController:didFinishWithResult:)]) {
-        [localDelegate composeViewController:self didFinishWithResult:REComposeResultPosted];
+    _cornerRadius = cornerRadius;
+    if (self.isViewLoaded) {
+        self.composeView.cornerRadius = _cornerRadius;
     }
-    if (_completionHandler)
-        _completionHandler(self, REComposeResultPosted);
 }
 
-#pragma mark -
-#pragma mark Orientation
+#pragma mark - Notification handler
 
-- (NSUInteger)supportedInterfaceOrientations
+- (void)textViewTextDidChange:(NSNotification *)notification
 {
-    return UIInterfaceOrientationMaskAll;
+    _text = [self.composeView.sheetView.textView.text copy];
 }
 
-- (BOOL)shouldAutorotate
+#pragma mark - Private
+
+- (REComposeView *)composeView
 {
-    return YES;
+    return (REComposeView *)self.view;
 }
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)orientation
+- (void)presentSheetViewAnimated:(BOOL)animated
 {
-    return YES;
+    self.composeView.sheetView = [[REComposeSheetView alloc] initWithFrame:self.view.bounds];
+    self.composeView.sheetView.attachmentImageView.image = self.attachmentImage;
+    self.composeView.sheetView.attachmentView.hidden = !self.attachment;
+    self.composeView.sheetView.textView.text = self.text;
+    [self.composeView.sheetView.navigationBar setItems:@[self.navigationItem] animated:NO];
+
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(textViewTextDidChange:)
+                                                 name:UITextViewTextDidChangeNotification
+                                               object:self.composeView.sheetView.textView];
+
+    [self.composeView layoutIfNeeded];
+    BOOL animationsEnabled = [UIView areAnimationsEnabled];
+    [UIView setAnimationsEnabled:animated];
+    [self.composeView.sheetView.textView becomeFirstResponder];
+    [UIView setAnimationsEnabled:animationsEnabled];
+
+    if (animated) {
+        CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"position"];
+        animation.duration = 0.25;
+        animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
+
+        NSArray *viewsToAnimate = @[ self.composeView.sheetView, self.composeView.shadowView, self.composeView.paperClipView ];
+        for (UIView *view in viewsToAnimate) {
+            CGPoint position = view.layer.position;
+            position.y += CGRectGetHeight(self.composeView.bounds);
+            animation.fromValue = [NSValue valueWithCGPoint:position];
+            [view.layer addAnimation:animation forKey:@"position"];
+        }
+    }
 }
 
-- (void)viewOrientationDidChanged:(NSNotification *)notification
+- (void)dismissSheetViewAnimated:(BOOL)animated completion:(void (^)(void))completion
 {
-    [self layoutWithOrientation:self.interfaceOrientation width:self.view.frame.size.width height:self.view.frame.size.height];
+    BOOL animationsEnabled = [UIView areAnimationsEnabled];
+    [UIView setAnimationsEnabled:animated];
+    [[UIApplication sharedApplication] sendAction:@selector(resignFirstResponder) to:nil from:nil forEvent:nil];
+    [UIView setAnimationsEnabled:animationsEnabled];
+
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+
+    if (animated) {
+        [UIView animateWithDuration:0.25
+                              delay:0.0
+                            options:(UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionCurveEaseIn)
+                         animations:^{
+                             NSArray *viewsToAnimate = @[ self.composeView.sheetView, self.composeView.shadowView, self.composeView.paperClipView ];
+                             for (UIView *view in viewsToAnimate) {
+                                 CGPoint center = view.center;
+                                 center.y += CGRectGetHeight(self.composeView.bounds);
+                                 view.center = center;
+                             }
+                         }
+                         completion:^(BOOL finished) {
+                             if (completion) {
+                                 completion();
+                             }
+                         }];
+    } else {
+        self.composeView.sheetView = nil;
+        if (completion) {
+            completion();
+        }
+    }
+}
+
+@end
+
+
+static char kPresentedComposeViewControllerKey;
+
+@implementation UIViewController (REComposeViewControllerPresentation)
+
+- (REComposeViewController *)presentedComposeViewController
+{
+    return objc_getAssociatedObject(self, &kPresentedComposeViewControllerKey);
+}
+
+- (void)setPresentedComposeViewController:(REComposeViewController *)viewController
+{
+    objc_setAssociatedObject(self, &kPresentedComposeViewControllerKey, viewController, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (void)presentComposeViewController:(REComposeViewController *)viewController animated:(BOOL)animated
+{
+    if (self.presentedComposeViewController) {
+        // exception
+    }
+
+    [self addChildViewController:viewController];
+    self.presentedComposeViewController = viewController;
+
+    viewController.view.frame = self.view.bounds;
+    viewController.view.autoresizingMask = (  UIViewAutoresizingFlexibleWidth
+                                            | UIViewAutoresizingFlexibleHeight);
+    CGFloat targetAlpha = viewController.view.alpha;
+    viewController.view.alpha = 0.0f;
+    viewController.view.layer.shouldRasterize = YES;
+    viewController.view.layer.rasterizationScale = [[UIScreen mainScreen] scale];
+
+    [self.view addSubview:viewController.view];
+
+    [UIView animateWithDuration:animated ? 0.3 : 0.0
+                     animations:^{
+                         viewController.view.alpha = targetAlpha;
+                     }
+                     completion:^(BOOL finished) {
+                         viewController.view.layer.shouldRasterize = NO;
+                         [viewController didMoveToParentViewController:self];
+                         [viewController presentSheetViewAnimated:animated];
+                     }];
+}
+
+- (void)dismissComposeViewControllerAnimated:(BOOL)animated completion:(void (^)(void))completion
+{
+    [self.presentedComposeViewController willMoveToParentViewController:nil];
+
+    [self.presentedComposeViewController dismissSheetViewAnimated:animated
+                                                       completion:^{
+                                                           CGFloat originalAlpha = self.presentedComposeViewController.view.alpha;
+                                                           self.presentedComposeViewController.view.layer.shouldRasterize = YES;
+                                                           self.presentedComposeViewController.view.layer.rasterizationScale = [[UIScreen mainScreen] scale];
+
+                                                           [UIView animateWithDuration:animated ? 0.3 : 0.0
+                                                                            animations:^{
+                                                                                self.presentedComposeViewController.view.alpha = 0.0f;
+                                                                            }
+                                                                            completion:^(BOOL finished) {
+                                                                                self.presentedComposeViewController.view.alpha = originalAlpha;
+                                                                                self.presentedComposeViewController.view.layer.shouldRasterize = NO;
+                                                                                [self.presentedComposeViewController.view removeFromSuperview];
+                                                                                [self.presentedComposeViewController removeFromParentViewController];
+                                                                                self.presentedComposeViewController = nil;
+
+                                                                                if (completion) {
+                                                                                    completion();
+                                                                                }
+                                                                            }];
+                                                       }];
 }
 
 @end
