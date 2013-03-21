@@ -2,7 +2,7 @@
 // REComposeViewController.m
 // REComposeViewController
 //
-// Copyright (c) 2012 Roman Efimov (https://github.com/romaonthego)
+// Copyright (c) 2013 Roman Efimov (https://github.com/romaonthego)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,9 @@
 
 @interface REComposeViewController ()
 
-@property (nonatomic, strong) UIImageView *bottomImageView;
+@property (strong, readonly, nonatomic) REComposeBackgroundView *backgroundView;
+@property (strong, readonly, nonatomic) UIView *containerView;
+@property (strong, readonly, nonatomic) REComposeSheetView *sheetView;
 
 @end
 
@@ -50,18 +52,22 @@
     return (!UIDeviceOrientationIsLandscape([[UIApplication sharedApplication] statusBarOrientation])) ? screen.bounds.size.width : screen.bounds.size.height;
 }
 
+- (void)loadView
+{
+    UIViewController *rootViewController = [UIApplication sharedApplication].delegate.window.rootViewController;
+    self.view = [[UIView alloc] initWithFrame:rootViewController.view.bounds];
+    self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
-    _bottomImageView = [[UIImageView alloc] initWithFrame:self.view.bounds];
-    _bottomImageView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-    
+
     _backgroundView = [[REComposeBackgroundView alloc] initWithFrame:self.view.bounds];
     _backgroundView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     _backgroundView.centerOffset = CGSizeMake(0, - self.view.frame.size.height / 2);
     _backgroundView.alpha = 0;
-    
+    [self.view addSubview:_backgroundView];
     
     _containerView = [[UIView alloc] initWithFrame:CGRectMake(0, self.view.frame.size.height, self.view.frame.size.width, 202)];
     _containerView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
@@ -70,14 +76,14 @@
     _backView.layer.shadowOpacity = 0.7;
     _backView.layer.shadowColor = [UIColor blackColor].CGColor;
     _backView.layer.shadowOffset = CGSizeMake(3, 5);
+    _backView.layer.shouldRasterize = YES;
+    _backView.layer.rasterizationScale = [UIScreen mainScreen].scale;
     
     _sheetView.frame = _backView.bounds;
     _sheetView.layer.cornerRadius = _cornerRadius;
     _sheetView.clipsToBounds = YES;
     _sheetView.delegate = self;
     
-    [self.view addSubview:_bottomImageView];
-    [self.view addSubview:_backgroundView];
     [_containerView addSubview:_backView];
     [self.view addSubview:_containerView];
     [_backView addSubview:_sheetView];
@@ -93,46 +99,39 @@
     _sheetView.attachmentImageView.image = _attachmentImage;
 }
 
-- (void)viewWillAppear:(BOOL)animated
+- (void)didMoveToParentViewController:(UIViewController *)parent
 {
-    [super viewWillAppear:animated];
-    [_sheetView.textView becomeFirstResponder];
+    [super didMoveToParentViewController:parent];
+    __typeof(&*self) __weak weakSelf = self;
     
     [UIView animateWithDuration:0.4 animations:^{
-        if (UIInterfaceOrientationIsLandscape(self.interfaceOrientation)) {
-            [self layoutWithOrientation:self.interfaceOrientation width:self.view.frame.size.height height:self.view.frame.size.width];
-        } else {
-            [self layoutWithOrientation:self.interfaceOrientation width:self.view.frame.size.width height:self.view.frame.size.height];
-        }
+        [weakSelf.sheetView.textView becomeFirstResponder];
+        [weakSelf layoutWithOrientation:weakSelf.interfaceOrientation width:weakSelf.view.frame.size.width height:weakSelf.view.frame.size.height];
     }];
     
-    [UIView animateWithDuration:0.4
-                          delay:0.1
+    [UIView animateWithDuration:0.3
+                          delay:0
                         options:UIViewAnimationOptionCurveEaseInOut
                      animations:^{
-        _backgroundView.alpha = 1;
+        weakSelf.backgroundView.alpha = 1;
     } completion:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(viewOrientationDidChanged:) name:UIDeviceOrientationDidChangeNotification object:nil];
 
 }
 
+- (void)presentFromRootViewController
+{
+    UIViewController *rootViewController = [UIApplication sharedApplication].delegate.window.rootViewController;
+    [rootViewController addChildViewController:self];
+    [rootViewController.view addSubview:self.view];
+    [self didMoveToParentViewController:rootViewController];
+}
+
 - (void) viewWillDisappear:(BOOL)animated
 {
     [super viewWillDisappear: animated];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIDeviceOrientationDidChangeNotification object:nil];
-}
-
-- (void)viewDidAppear:(BOOL)animated
-{
-    [super viewDidAppear:animated];
-    
-    UIGraphicsBeginImageContextWithOptions(self.view.bounds.size, YES, [[UIScreen mainScreen] scale]);
-    [self.presentingViewController.view.layer renderInContext:UIGraphicsGetCurrentContext()];
-    UIImage *presentingViewControllerSnapshotImage = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-    
-    [self.bottomImageView setImage:presentingViewControllerSnapshotImage];
 }
 
 - (void)layoutWithOrientation:(UIInterfaceOrientation)interfaceOrientation width:(NSInteger)width height:(NSInteger)height
@@ -147,25 +146,26 @@
         
         NSInteger verticalOffset = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? 316 : 216;
         
-        NSInteger containerWidth = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? _containerView.frame.size.height : _containerView.frame.size.width;
-        frame.origin.y = (width - verticalOffset - containerWidth) / 2;
-        if (frame.origin.y < 0) frame.origin.y = 0;
+        NSInteger containerHeight = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? _containerView.frame.size.height : _containerView.frame.size.height;
+        frame.origin.y = (height - verticalOffset - containerHeight) / 2;
+        if (frame.origin.y < 20) frame.origin.y = 20;
         _containerView.frame = frame;
         
         _containerView.clipsToBounds = YES;
-        _backView.frame = CGRectMake(offset, 0, height - offset*2, UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? 202 : 140);
+        _backView.frame = CGRectMake(offset, 0, width - offset*2, UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? 202 : 140);
         _sheetView.frame = _backView.bounds;
         
         CGRect paperclipFrame = _paperclipView.frame;
-        paperclipFrame.origin.x = height - 73 - offset;
+        paperclipFrame.origin.x = width - 73 - offset;
         _paperclipView.frame = paperclipFrame;
     } else {
         CGRect frame = _containerView.frame;
         frame.origin.y = (height - 216 - _containerView.frame.size.height) / 2;
-        if (frame.origin.y < 0) frame.origin.y = 0;
+        if (frame.origin.y < 20) frame.origin.y = 20;
         _containerView.frame = frame;
         _backView.frame = CGRectMake(offset, 0, width - offset*2, 202);
         _sheetView.frame = _backView.bounds;
+        
         
         CGRect paperclipFrame = _paperclipView.frame;
         paperclipFrame.origin.x = width - 73 - offset;
@@ -197,19 +197,22 @@
 - (void)dismissViewControllerAnimated:(BOOL)flag completion:(void (^)(void))completion
 {
     [_sheetView.textView resignFirstResponder];
+    __typeof(&*self) __weak weakSelf = self;
+    
     [UIView animateWithDuration:0.4 animations:^{
         CGRect frame = _containerView.frame;
         frame.origin.y = self.view.frame.size.height;
-        _containerView.frame = frame;
+        weakSelf.containerView.frame = frame;
     }];
     
     [UIView animateWithDuration:0.4
                           delay:0.1
                         options:UIViewAnimationOptionCurveEaseInOut
                      animations:^{
-                         _backgroundView.alpha = 0;
+                         weakSelf.backgroundView.alpha = 0;
                      } completion:^(BOOL finished) {
-                         [super dismissViewControllerAnimated:NO completion:nil];
+                         [weakSelf.view removeFromSuperview];
+                         [weakSelf removeFromParentViewController];
                      }];
 }
 
@@ -226,25 +229,10 @@
     return _sheetView.navigationBar;
 }
 
-- (UIImage *)attachmentImage
-{
-    return _attachmentImage;
-}
-
 - (void)setAttachmentImage:(UIImage *)attachmentImage
 {
     _attachmentImage = attachmentImage;
     _sheetView.attachmentImageView.image = _attachmentImage;
-}
-
-- (BOOL)hasAttachment
-{
-    return _hasAttachment;
-}
-
-- (void)setHasAttachment:(BOOL)hasAttachment
-{
-    _hasAttachment = hasAttachment;
 }
 
 - (NSString *)text
