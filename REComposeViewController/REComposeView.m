@@ -135,7 +135,7 @@ static const CGFloat kPaperClipYOffsetFromAttachmentView = 23.0f;
     CGFloat topBoundary = MAX(CGRectGetMaxY(statusBarFrameInSelfCoordinates), CGRectGetMinY(self.bounds));
     CGFloat bottomBoundary = MIN(CGRectGetMinY(self.keyboardFrame), CGRectGetMaxY(self.bounds));
 
-    center.y = roundf((bottomBoundary + topBoundary) / 2.0f);
+    center.y = roundf((bottomBoundary + topBoundary) / 2.0f - CGRectGetHeight(self.sheetView.bounds) / 2.0f) + CGRectGetHeight(self.sheetView.bounds) / 2.0f;
 
     self.sheetView.center = center;
 
